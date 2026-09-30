@@ -13,6 +13,12 @@ No revoques certificados de otras apps para configurar esta. No se crearon ni ca
 
 ## Compilación para simulador de iPhone
 
+## Capturas nativas para App Store
+
+El flujo **ios-screenshots** ejecuta XCUITest en un iPhone 13 Pro Max nuevo en cada build. Genera siete PNG verticales nativos de **1284 × 2778**, aceptados en el espacio de iPhone 6,5 pulgadas indicado por App Store Connect, y un ZIP descargable. Las imágenes no se redimensionan ni se recortan; el script verifica sus dimensiones y exporta PNG sin canal alfa. Incluye mapa, módulos, grupo M8, capas activas, mapas base, datos de una cuenca con ficha real e indicadores. Revisa visualmente los mapas y datos antes de subirlas. No activa App Preview ni carga capturas a Apple. Si falla la navegación o la resolución, el build falla y conserva los adjuntos y logs para diagnóstico.
+
+## Uso del simulador
+
 Ejecuta manualmente **ios-simulator** sobre `main`. Genera `App.app` para iPhoneSimulator y `Geoportal-PFP-iPhone-Simulator.zip`, además del log de Xcode. No utiliza certificados, no modifica el IPA firmado y no sube nada a Apple. El ZIP contiene la app preparada para un simulador iOS en Mac o un servicio compatible; no se instala en un iPhone físico. App Preview interactivo es una función aparte de Codemagic y no se activa ni contrata con este flujo. Este workflow compila la app; todavía no automatiza capturas.
 
 ## Resultado de distribución y límites

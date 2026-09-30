@@ -1,4 +1,33 @@
 workflows:
+  ios-screenshots:
+    name: Geoportal PFP - Capturas iPhone 6.5
+    instance_type: mac_mini_m2
+    max_build_duration: 30
+    environment:
+      node: 22
+      xcode: latest
+    scripts:
+      - name: Install locked dependencies
+        script: npm ci
+      - name: Build web resources and sync iOS
+        script: |
+          set -e
+          npm run icons
+          npm run sync
+          npm run verify:ios
+      - name: Capture native iPhone screens with XCUITest
+        script: |
+          set -euo pipefail
+          mkdir -p build/ios/screenshots
+          node scripts/capture-ios.mjs 2>&1 | tee build/ios/screenshots/capture.log
+    artifacts:
+      - build/ios/screenshots/Geoportal-PFP-Capturas-iPhone-65.zip
+      - build/ios/screenshots/iPhone-65-1284x2778/*.png
+      - build/ios/screenshots/iPhone-65-1284x2778/resoluciones.json
+      - build/ios/screenshots/attachments/**
+      - build/ios/screenshots/capture.log
+      - build/ios/screenshots/device.json
+    # Manual execution, no App Preview subscription and no store submission.
   ios-simulator:
     name: Geoportal PFP - iPhone Simulator
     instance_type: mac_mini_m2
