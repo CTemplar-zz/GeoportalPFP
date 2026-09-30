@@ -11,8 +11,6 @@ Preparado el 30 de septiembre de 2026. Proyecto Capacitor 8, Swift Package Manag
 
 No revoques certificados de otras apps para configurar esta. No se crearon ni cargaron credenciales durante la preparación del repositorio.
 
-## Resultado y límites
-
 ## Compilación para simulador de iPhone
 
 Ejecuta manualmente **ios-simulator** sobre `main`. Genera `App.app` para iPhoneSimulator y `Geoportal-PFP-iPhone-Simulator.zip`, además del log de Xcode. No utiliza certificados, no modifica el IPA firmado y no sube nada a Apple. El ZIP contiene la app preparada para un simulador iOS en Mac o un servicio compatible; no se instala en un iPhone físico. App Preview interactivo es una función aparte de Codemagic y no se activa ni contrata con este flujo. Este workflow compila la app; todavía no automatiza capturas.
