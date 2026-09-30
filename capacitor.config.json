@@ -1,0 +1,11 @@
+{
+  "appId": "org.howwe.geoportal",
+  "appName": "Geoportal PFP",
+  "webDir": "www",
+  "backgroundColor": "#123e35",
+  "ios": { "contentInset": "never", "backgroundColor": "#123e35", "preferredContentMode": "mobile" },
+  "plugins": {
+    "SplashScreen": { "launchAutoHide": true, "launchShowDuration": 600, "backgroundColor": "#123e35", "showSpinner": false },
+    "StatusBar": { "style": "LIGHT", "backgroundColor": "#123e35" }
+  }
+}

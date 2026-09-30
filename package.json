@@ -1,0 +1,33 @@
+{
+  "name": "geoportal-pfp-iphone",
+  "version": "0.1.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "dev": "node scripts/serve.mjs",
+    "sync": "npm run build && cap sync ios",
+    "verify:ios": "node scripts/verify-ios.mjs",
+    "ios": "cap open ios",
+    "test": "playwright test",
+    "icons": "node scripts/icons.mjs"
+  },
+  "dependencies": {
+    "@capacitor/app": "^8.0.0",
+    "@capacitor/core": "^8.5.2",
+    "@capacitor/filesystem": "^8.0.0",
+    "@capacitor/geolocation": "^8.0.0",
+    "@capacitor/ios": "^8.5.2",
+    "@capacitor/share": "^8.0.0",
+    "@capacitor/splash-screen": "^8.0.0",
+    "@capacitor/status-bar": "^8.0.0",
+    "@fontsource/inter": "^5.2.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.5.2",
+    "@playwright/test": "^1.56.0",
+    "esbuild": "^0.25.0",
+    "sharp": "^0.34.0"
+  },
+  "engines": { "node": ">=22" }
+}

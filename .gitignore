@@ -1,0 +1,41 @@
+# Rebuilt by npm / Capacitor
+node_modules/
+www/
+build-report.json
+build/
+dist/
+DerivedData/
+ios/App/DerivedData/
+ios/App/App/public/
+ios/App/App/capacitor.config.json
+ios/App/App/config.xml
+**/xcuserdata/
+*.xcuserstate
+
+# Local deliverables and account evidence (never publish)
+entregables/
+outputs/
+test-results/
+playwright-report/
+appstore/
+*.ipa
+*.apk
+*.xcarchive/
+
+# Signing material, secrets and local configuration
+.env
+.env.*
+!.env.example
+*.p8
+*.p12
+*.pfx
+*.pem
+*.key
+*.cer
+*.mobileprovision
+*.provisionprofile
+*.keystore
+*.jks
+.DS_Store
+Thumbs.db
+*.log
