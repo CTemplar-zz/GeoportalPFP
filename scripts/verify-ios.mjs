@@ -12,7 +12,9 @@ assert.equal(config.server?.url,undefined,'No se admite servidor de desarrollo e
 assert.equal(nativeConfig.server?.url,undefined);
 assert.equal(config.webDir,'www');
 const project=await read('ios/App/App.xcodeproj/project.pbxproj');
-assert.equal((project.match(/TARGETED_DEVICE_FAMILY = 1;/g)||[]).length,2);
+// Debug + Release for the app and its separate screenshot UI-test runner.
+assert.equal((project.match(/TARGETED_DEVICE_FAMILY = 1;/g)||[]).length,4);
+assert.equal((project.match(/PRODUCT_BUNDLE_IDENTIFIER = org\.howwe\.geoportal\.uitests;/g)||[]).length,2);
 assert.equal((project.match(/PRODUCT_BUNDLE_IDENTIFIER = org\.howwe\.geoportal;/g)||[]).length,2);
 assert.equal((project.match(/MARKETING_VERSION = 0\.1\.1;/g)||[]).length,2);
 assert(project.includes('PrivacyInfo.xcprivacy in Resources'));
