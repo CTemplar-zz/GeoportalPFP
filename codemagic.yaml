@@ -1,4 +1,47 @@
 workflows:
+  ios-simulator:
+    name: Geoportal PFP - iPhone Simulator
+    instance_type: mac_mini_m2
+    max_build_duration: 30
+    environment:
+      node: 22
+      xcode: latest
+    scripts:
+      - name: Install locked dependencies
+        script: npm ci
+      - name: Build web resources and sync iOS
+        script: |
+          set -e
+          npm run icons
+          npm run sync
+          npm run verify:ios
+      - name: Build iPhone simulator app
+        script: |
+          set -euo pipefail
+          mkdir -p build/ios/simulator
+          xcodebuild build \
+            -project ios/App/App.xcodeproj \
+            -scheme App \
+            -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            -configuration Debug \
+            -derivedDataPath build/ios/simulator/DerivedData \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            2>&1 | tee build/ios/simulator/xcodebuild.log
+      - name: Package simulator app
+        script: |
+          set -e
+          SIM_APP="build/ios/simulator/DerivedData/Build/Products/Debug-iphonesimulator/App.app"
+          test -d "$SIM_APP"
+          /usr/libexec/PlistBuddy -c 'Print :CFBundleSupportedPlatforms:0' "$SIM_APP/Info.plist" | grep -qx iPhoneSimulator
+          ditto -c -k --sequesterRsrc --keepParent "$SIM_APP" build/ios/simulator/Geoportal-PFP-iPhone-Simulator.zip
+    artifacts:
+      - build/ios/simulator/DerivedData/Build/Products/Debug-iphonesimulator/App.app
+      - build/ios/simulator/Geoportal-PFP-iPhone-Simulator.zip
+      - build/ios/simulator/xcodebuild.log
+    # Simulator only: no distribution credentials, store upload or paid App Preview.
   ios-app-store:
     name: Geoportal PFP - iPhone App Store
     instance_type: mac_mini_m2

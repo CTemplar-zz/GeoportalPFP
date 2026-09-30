@@ -13,6 +13,12 @@ No revoques certificados de otras apps para configurar esta. No se crearon ni ca
 
 ## Resultado y límites
 
+## Compilación para simulador de iPhone
+
+Ejecuta manualmente **ios-simulator** sobre `main`. Genera `App.app` para iPhoneSimulator y `Geoportal-PFP-iPhone-Simulator.zip`, además del log de Xcode. No utiliza certificados, no modifica el IPA firmado y no sube nada a Apple. El ZIP contiene la app preparada para un simulador iOS en Mac o un servicio compatible; no se instala en un iPhone físico. App Preview interactivo es una función aparte de Codemagic y no se activa ni contrata con este flujo. Este workflow compila la app; todavía no automatiza capturas.
+
+## Resultado de distribución y límites
+
 Al terminar correctamente se espera un IPA en `build/ios/ipa/`, disponible en los artefactos de Codemagic. Los logs de Xcode también se conservan como artefactos. El workflow no contiene `publishing` ni disparadores de ejecución automática: no sube el IPA a Apple ni envía una revisión.
 
 Usa una imagen estable de Xcode compatible con los requisitos vigentes de Apple (Capacitor 8 requiere al menos Xcode 26). Se utiliza `xcode: latest` para la imagen estable de Codemagic, no `edge`.
