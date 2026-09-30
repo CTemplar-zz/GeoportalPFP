@@ -31,6 +31,10 @@ try {
     'CODE_SIGN_IDENTITY=', 'CODE_SIGNING_REQUIRED=NO', 'CODE_SIGNING_ALLOWED=NO']);
 } catch (error) { failure = error; }
 try {
+  const log = run('xcrun', ['simctl', 'spawn', device, 'log', 'show', '--last', '15m', '--style', 'compact', '--predicate', 'eventMessage CONTAINS "GeoportalDiagnostic" OR (process == "App" AND messageType == error)'], { stdio: 'pipe' });
+  await fs.writeFile(path.join(root, 'native-startup.log'), log);
+} catch (error) { console.warn('Native diagnostic log unavailable:', error.message); }
+try {
   await fs.access(result);
   run('xcrun', ['xcresulttool', 'export', 'attachments', '--path', result, '--output-path', attachments]);
 } catch (error) { failure ??= error; }

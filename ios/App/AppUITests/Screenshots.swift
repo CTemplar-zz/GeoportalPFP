@@ -18,7 +18,7 @@ final class Screenshots: XCTestCase {
     }
 
     private func tap(_ text: String, exact: Bool = false, scroll: Bool = false) throws {
-        for _ in 0..<(scroll ? 14 : 12) {
+        for _ in 0..<(scroll ? 14 : 60) {
             if let element = button(text, exact: exact) { element.tap(); return }
             if scroll { swipeContent(up: true) } else { Thread.sleep(forTimeInterval: 1) }
         }
@@ -26,6 +26,7 @@ final class Screenshots: XCTestCase {
         tree.name = "accessibility-failure-\(text)"
         tree.lifetime = .keepAlways
         add(tree)
+        capture("diagnostico-control-ausente", wait: 0)
         XCTFail("No se encontró el control visible: \(text)")
         throw NSError(domain: "Screenshots", code: 1)
     }

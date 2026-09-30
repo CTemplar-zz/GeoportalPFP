@@ -26,6 +26,7 @@ workflows:
       - build/ios/screenshots/iPhone-65-1284x2778/resoluciones.json
       - build/ios/screenshots/attachments/**
       - build/ios/screenshots/capture.log
+    - build/ios/screenshots/native-startup.log
       - build/ios/screenshots/device.json
     # Manual execution, no App Preview subscription and no store submission.
   ios-simulator:
