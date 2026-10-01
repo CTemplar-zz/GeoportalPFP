@@ -17,6 +17,7 @@ assert.equal((project.match(/TARGETED_DEVICE_FAMILY = 1;/g)||[]).length,4);
 assert.equal((project.match(/PRODUCT_BUNDLE_IDENTIFIER = org\.howwe\.geoportal\.uitests;/g)||[]).length,2);
 assert.equal((project.match(/PRODUCT_BUNDLE_IDENTIFIER = org\.howwe\.geoportal;/g)||[]).length,2);
 assert.equal((project.match(/MARKETING_VERSION = 1\.0;/g)||[]).length,2);
+assert.equal((project.match(/CURRENT_PROJECT_VERSION = 4;/g)||[]).length,2);
 assert(project.includes('PrivacyInfo.xcprivacy in Resources'));
 const info=await read('ios/App/App/Info.plist');
 for(const key of ['NSLocationWhenInUseUsageDescription','NSLocationAlwaysAndWhenInUseUsageDescription','UIApplicationSceneManifest'])assert(info.includes(`<key>${key}</key>`));
@@ -24,6 +25,22 @@ assert(!info.includes('NSAllowsArbitraryLoads'),'No desactivar ATS globalmente.'
 assert(!info.includes('UIBackgroundModes'),'No se solicita ubicación en segundo plano.');
 const privacy=await read('ios/App/App/PrivacyInfo.xcprivacy');
 assert(privacy.includes('NSPrivacyAccessedAPICategoryFileTimestamp')&&privacy.includes('C617.1'));
+assert(/<key>NSPrivacyTracking<\/key>\s*<false\s*\/>/.test(privacy),'No se declara seguimiento publicitario.');
+assert(/<key>NSPrivacyTrackingDomains<\/key>\s*<array\s*\/>/.test(privacy));
+const collected=privacy.match(/<key>NSPrivacyCollectedDataTypes<\/key>\s*<array>([\s\S]*?)<\/array>\s*<key>NSPrivacyAccessedAPITypes/);
+assert(collected,'Falta la lista de recopilación publicada en App Store Connect.');
+const declarations=[...collected[1].matchAll(/<dict>([\s\S]*?)<\/dict>/g)].map(match=>match[1]);
+const expectedTypes=['PreciseLocation','CoarseLocation','OtherUsageData','OtherDiagnosticData'].map(type=>'NSPrivacyCollectedDataType'+type);
+assert.equal(declarations.length,expectedTypes.length);
+const actualTypes=declarations.map(entry=>entry.match(/<key>NSPrivacyCollectedDataType<\/key>\s*<string>([^<]+)<\/string>/)?.[1]);
+assert.deepEqual(actualTypes.sort(),expectedTypes.sort(),'Los tipos deben coincidir con Apple.');
+for(const entry of declarations){
+  assert(/<key>NSPrivacyCollectedDataTypeLinked<\/key>\s*<true\s*\/>/.test(entry));
+  assert(/<key>NSPrivacyCollectedDataTypeTracking<\/key>\s*<false\s*\/>/.test(entry));
+  const purposes=entry.match(/<key>NSPrivacyCollectedDataTypePurposes<\/key>\s*<array>([\s\S]*?)<\/array>/);
+  assert(purposes);
+  assert.deepEqual([...purposes[1].matchAll(/<string>([^<]+)<\/string>/g)].map(match=>match[1]).sort(),['NSPrivacyCollectedDataTypePurposeAnalytics','NSPrivacyCollectedDataTypePurposeAppFunctionality'].sort());
+}
 const swift=await read('ios/App/CapApp-SPM/Package.swift');
 for(const [,relative] of swift.matchAll(/path: "([^"]+)"/g))await fs.access(path.resolve(root,'ios/App/CapApp-SPM',relative));
 assert(!/[A-Z]:[\\/]/.test(swift),'No deben existir dependencias absolutas de Windows.');
