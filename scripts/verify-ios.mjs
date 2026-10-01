@@ -16,7 +16,7 @@ const project=await read('ios/App/App.xcodeproj/project.pbxproj');
 assert.equal((project.match(/TARGETED_DEVICE_FAMILY = 1;/g)||[]).length,4);
 assert.equal((project.match(/PRODUCT_BUNDLE_IDENTIFIER = org\.howwe\.geoportal\.uitests;/g)||[]).length,2);
 assert.equal((project.match(/PRODUCT_BUNDLE_IDENTIFIER = org\.howwe\.geoportal;/g)||[]).length,2);
-assert.equal((project.match(/MARKETING_VERSION = 0\.1\.1;/g)||[]).length,2);
+assert.equal((project.match(/MARKETING_VERSION = 1\.0;/g)||[]).length,2);
 assert(project.includes('PrivacyInfo.xcprivacy in Resources'));
 const info=await read('ios/App/App/Info.plist');
 for(const key of ['NSLocationWhenInUseUsageDescription','NSLocationAlwaysAndWhenInUseUsageDescription','UIApplicationSceneManifest'])assert(info.includes(`<key>${key}</key>`));

@@ -24,6 +24,8 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+    <key>ITSAppUsesNonExemptEncryption</key>
+    <false/>
     <key>NSLocationWhenInUseUsageDescription</key>
     <string>Tu ubicación permite mostrar dónde estás en el mapa cuando pulsas Mi ubicación.</string>
     <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
