@@ -12,15 +12,19 @@ assert.equal(config.server?.url,undefined,'No se admite servidor de desarrollo e
 assert.equal(nativeConfig.server?.url,undefined);
 assert.equal(config.webDir,'www');
 const project=await read('ios/App/App.xcodeproj/project.pbxproj');
-// Debug + Release for the app and its separate screenshot UI-test runner.
-assert.equal((project.match(/TARGETED_DEVICE_FAMILY = 1;/g)||[]).length,4);
+// Universal app in Debug/Release; the existing iPhone screenshot runner stays separate.
+assert.equal((project.match(/TARGETED_DEVICE_FAMILY = "1,2";/g)||[]).length,2);
+assert.equal((project.match(/TARGETED_DEVICE_FAMILY = 1;/g)||[]).length,2);
 assert.equal((project.match(/PRODUCT_BUNDLE_IDENTIFIER = org\.howwe\.geoportal\.uitests;/g)||[]).length,2);
 assert.equal((project.match(/PRODUCT_BUNDLE_IDENTIFIER = org\.howwe\.geoportal;/g)||[]).length,2);
 assert.equal((project.match(/MARKETING_VERSION = 1\.0;/g)||[]).length,2);
-assert.equal((project.match(/CURRENT_PROJECT_VERSION = 4;/g)||[]).length,2);
+assert.equal((project.match(/CURRENT_PROJECT_VERSION = 5;/g)||[]).length,2);
 assert(project.includes('PrivacyInfo.xcprivacy in Resources'));
 const info=await read('ios/App/App/Info.plist');
 for(const key of ['NSLocationWhenInUseUsageDescription','NSLocationAlwaysAndWhenInUseUsageDescription','UIApplicationSceneManifest'])assert(info.includes(`<key>${key}</key>`));
+const ipadOrientations=info.match(/<key>UISupportedInterfaceOrientations~ipad<\/key>\s*<array>([\s\S]*?)<\/array>/)?.[1]||'';
+for(const orientation of ['Portrait','PortraitUpsideDown','LandscapeLeft','LandscapeRight'])assert(ipadOrientations.includes(`<string>UIInterfaceOrientation${orientation}</string>`));
+assert(!/<key>UIRequiresFullScreen<\/key>\s*<true\/>/.test(info),'No bloquear las ventanas adaptables de iPad.');
 assert(!info.includes('NSAllowsArbitraryLoads'),'No desactivar ATS globalmente.');
 assert(!info.includes('UIBackgroundModes'),'No se solicita ubicación en segundo plano.');
 const privacy=await read('ios/App/App/PrivacyInfo.xcprivacy');
@@ -63,5 +67,5 @@ async function compare(dir=''){
 }
 const files=await compare();
 assert((await read('src/mobile.js')).includes('function moveLayer('));
-console.log(`OK: proyecto iPhone, permisos, manifiesto, icono opaco 1024×1024, rutas SPM relativas, esquema Release y ${files} recursos sincronizados.`);
+console.log(`OK: proyecto universal iPhone/iPad 1.0 (5), cuatro orientaciones iPad, permisos, manifiesto, icono opaco 1024×1024, rutas SPM relativas, esquema Release y ${files} recursos sincronizados.`);
 console.log('Comprobación estática; no sustituye la compilación con Xcode ni las pruebas en un iPhone real.');

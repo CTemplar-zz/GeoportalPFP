@@ -1,6 +1,8 @@
-# Geoportal PFP · iPhone
+# Geoportal PFP · iPhone e iPad
 
 Aplicación iOS basada en Capacitor y Leaflet, con mapa a pantalla completa, nueve módulos temáticos, capas por grupos, orden de superposición, indicadores INE y descarga de fichas de cuencas.
+
+Actualización del 2 de octubre de 2026: versión 1.0 (5), target universal iPhone/iPad y paneles adaptables a rotación y ventanas estrechas. En pantallas amplias se puede interactuar con el mapa mientras se consultan capas e indicadores. `tests/adaptive.spec.js` cubre estas interacciones.
 
 ## Compilar con Codemagic
 
@@ -10,7 +12,7 @@ Aplicación iOS basada en Capacitor y Leaflet, con mapa a pantalla completa, nue
 4. Ejecuta el workflow manualmente. Instala dependencias, genera recursos, sincroniza iOS y compila el IPA firmado.
 5. Descarga el IPA de los artefactos cuando la compilación termine correctamente.
 
-El repositorio no contiene certificados, claves API ni perfiles. **La firma todavía debe configurarse en Codemagic.** Este workflow no publica ni envía la app a revisión y no se ejecuta automáticamente con cada push. Su compilación nativa aún debe validarse en el primer build de macOS.
+El repositorio no contiene certificados, claves API ni perfiles. El workflow usa la integración existente **Codemagic iOS Build** y las identidades de firma configuradas en Codemagic. Sube el IPA a App Store Connect; no lo envía automáticamente a revisión de App Store ni beta y no se ejecuta con cada push. Tras el procesamiento en Apple, la compilación se habilita en el grupo interno de TestFlight.
 
 ## Desarrollo local
 

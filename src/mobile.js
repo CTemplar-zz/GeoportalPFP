@@ -7,6 +7,13 @@
   const esc=value=>escapeHTML(String(value??''));
   document.querySelectorAll('[data-icon]').forEach(el=>el.innerHTML=icon(el.dataset.icon));
   const sheet=$('mobileSheet'),content=$('sheetContent'),backdrop=$('sheetBackdrop');
+  // Adapt to the available window, including iPad Split View and Stage Manager.
+  const wideLayout=window.matchMedia('(min-width:700px) and (min-height:600px)');
+  function updatePanelLayout(){
+    sheet.setAttribute('aria-modal',String(!wideLayout.matches));
+    backdrop.hidden=!panel||wideLayout.matches;
+    document.body.classList.toggle('tablet-panel-open',Boolean(panel)&&wideLayout.matches);
+  }
   const right=$('right'),legend=$('legend');
   const rightHome=document.createComment('right panel home'),legendHome=document.createComment('legend home');
   right.before(rightHome);legend.before(legendHome);
@@ -132,12 +139,14 @@
   function close(){
     if(!panel)return false;
     restoreHomes();panel=null;sheet.hidden=true;backdrop.hidden=true;
+    updatePanelLayout();
     document.querySelectorAll('.mobile-nav button').forEach(b=>b.classList.toggle('selected',b.dataset.panel==='map'));
     returnFocus?.focus({preventScroll:true});returnFocus=null;map.invalidateSize();return true;
   }
   function open(type){
     returnFocus=document.activeElement;
     restoreHomes();panel=type;content.innerHTML='';sheet.hidden=false;backdrop.hidden=false;
+    updatePanelLayout();
     const titles={layers:'Capas del mapa',active:'Capas activas',data:'Datos del territorio',bases:'Elige tu mapa base',legend:'Leyenda del mapa',search:'Encuentra un lugar',more:'Tu exploración',filters:'Áreas protegidas',saved:'Vistas guardadas'};
     $('sheetTitle').textContent=titles[type]||'Geoportal PFP';
     $('sheetEyebrow').textContent=type==='data'?`M${currentModule} · ${MODULES[currentModule].title}`:'EXPLORA EL TERRITORIO';
@@ -273,7 +282,7 @@
   window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installPrompt=e;});
   document.addEventListener('keydown',e=>{
     if(e.key==='Escape')close();
-    if(e.key==='Tab'&&panel){const items=[...sheet.querySelectorAll('button:not(:disabled),a[href],input,select,[tabindex="0"]')].filter(e=>e.getClientRects().length),first=items[0],last=items.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last?.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus();}}
+    if(e.key==='Tab'&&panel&&!wideLayout.matches){const items=[...sheet.querySelectorAll('button:not(:disabled),a[href],input,select,[tabindex="0"]')].filter(e=>e.getClientRects().length),first=items[0],last=items.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last?.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus();}}
   });
   let swipeStart=null;sheet.querySelector('.sheet-handle').addEventListener('touchstart',e=>swipeStart=e.touches[0].clientY,{passive:true});sheet.addEventListener('touchend',e=>{if(swipeStart!==null&&e.changedTouches[0].clientY-swipeStart>60)close();swipeStart=null;},{passive:true});
   // Use the native share sheet for PDFs/Excel; keep downloads functional in browsers too.
@@ -286,7 +295,16 @@
   new MutationObserver(updateSelectionChip).observe($('rightTitle'),{childList:true,subtree:true,characterData:true});
   window.addEventListener('mobile:data',()=>{if(currentModule==='2'){renderM2Stats();renderM2Donut();}});
   map.on('moveend',saveState);
-  window.addEventListener('resize',()=>map.invalidateSize());
+  let resizeFrame;
+  function resizeLayout(){
+    updatePanelLayout();
+    cancelAnimationFrame(resizeFrame);
+    resizeFrame=requestAnimationFrame(()=>map.invalidateSize({pan:false}));
+  }
+  wideLayout.addEventListener('change',resizeLayout);
+  window.addEventListener('resize',resizeLayout);
+  window.visualViewport?.addEventListener('resize',resizeLayout);
+  updatePanelLayout();
   window.MobileUI={open,close,toast,getState:()=>({panel,currentModule,active:selected().map(x=>({module:x.mod,id:x.layer.id})),base:baseId})};
   const saved=storage.get('state',null);if(saved)restoreState(saved);else renderModule('1');setBase(baseId);
   if(!window.MobileNative.native&&'serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>toast('No se pudo preparar el modo sin conexión.'));

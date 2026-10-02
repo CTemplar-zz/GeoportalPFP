@@ -1,6 +1,6 @@
 # Configuración de Codemagic
 
-Preparado el 30 de septiembre de 2026. Proyecto Capacitor 8, Swift Package Manager; no requiere CocoaPods ni Android Studio.
+Actualizado el 2 de octubre de 2026. Proyecto universal iPhone/iPad, versión 1.0 (5), Capacitor 8 y Swift Package Manager; no requiere CocoaPods ni Android Studio.
 
 ## Importar y firmar
 
@@ -21,13 +21,13 @@ Ejecuta manualmente **ios-simulator** sobre `main`. Genera `App.app` para iPhone
 
 ## Resultado de distribución y límites
 
-Al terminar correctamente se espera un IPA en `build/ios/ipa/`, disponible en los artefactos de Codemagic. Los logs de Xcode también se conservan como artefactos. El workflow no contiene `publishing` ni disparadores de ejecución automática: no sube el IPA a Apple ni envía una revisión.
+Al terminar correctamente se espera un IPA en `build/ios/ipa/`, disponible en los artefactos de Codemagic. Los logs de Xcode también se conservan como artefactos. El workflow `ios-app-store`, llamado **Geoportal PFP - iPhone e iPad App Store**, usa la integración existente **Codemagic iOS Build** para subir el IPA a App Store Connect. `submit_to_testflight` y `submit_to_app_store` permanecen en `false`: no se envía ninguna revisión automáticamente. Tras el procesamiento, se habilita la compilación manualmente en el grupo interno **Test geoportal PFP**. La subida no sustituye el build 4 pendiente de revisión de App Store.
 
 Usa una imagen estable de Xcode compatible con los requisitos vigentes de Apple (Capacitor 8 requiere al menos Xcode 26). Se utiliza `xcode: latest` para la imagen estable de Codemagic, no `edge`.
 
-El build está fijado inicialmente en 2. Antes de una nueva carga de la misma versión, incrementa `CURRENT_PROJECT_VERSION` en las configuraciones Debug y Release de `ios/App/App.xcodeproj/project.pbxproj`. Si cambias la versión comercial, actualiza `MARKETING_VERSION`, `package.json` y su comprobación en `scripts/verify-ios.mjs`.
+El build está fijado en 5. Antes de una nueva carga de la misma versión, incrementa `CURRENT_PROJECT_VERSION` en Debug y Release y su comprobación en `scripts/verify-ios.mjs`. Si cambias la versión comercial, actualiza `MARKETING_VERSION` y su comprobación. La versión de `package.json` identifica el paquete web, no la versión nativa que recibe Apple.
 
-La compilación web y sincronización pueden verificarse en Windows, pero el IPA firmado solo se confirma con un build macOS exitoso. La primera ejecución puede requerir ajustes de firma propios de la cuenta; no se ha iniciado una compilación de pago ni probado este workflow en Codemagic.
+La compilación web y sincronización pueden verificarse en Windows, pero el IPA firmado solo se confirma con un build macOS exitoso. La configuración de firma existente ya produjo el build 4. El nuevo build universal debe comprobarse en Codemagic y TestFlight.
 
 ## Comprobaciones antes de publicar
 
