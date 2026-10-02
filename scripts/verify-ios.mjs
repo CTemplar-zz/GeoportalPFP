@@ -18,7 +18,7 @@ assert.equal((project.match(/TARGETED_DEVICE_FAMILY = 1;/g)||[]).length,2);
 assert.equal((project.match(/PRODUCT_BUNDLE_IDENTIFIER = org\.howwe\.geoportal\.uitests;/g)||[]).length,2);
 assert.equal((project.match(/PRODUCT_BUNDLE_IDENTIFIER = org\.howwe\.geoportal;/g)||[]).length,2);
 assert.equal((project.match(/MARKETING_VERSION = 1\.0;/g)||[]).length,2);
-assert.equal((project.match(/CURRENT_PROJECT_VERSION = 5;/g)||[]).length,2);
+assert.equal((project.match(/CURRENT_PROJECT_VERSION = 6;/g)||[]).length,2);
 assert(project.includes('PrivacyInfo.xcprivacy in Resources'));
 const info=await read('ios/App/App/Info.plist');
 for(const key of ['NSLocationWhenInUseUsageDescription','NSLocationAlwaysAndWhenInUseUsageDescription','UIApplicationSceneManifest'])assert(info.includes(`<key>${key}</key>`));
@@ -67,5 +67,5 @@ async function compare(dir=''){
 }
 const files=await compare();
 assert((await read('src/mobile.js')).includes('function moveLayer('));
-console.log(`OK: proyecto universal iPhone/iPad 1.0 (5), cuatro orientaciones iPad, permisos, manifiesto, icono opaco 1024×1024, rutas SPM relativas, esquema Release y ${files} recursos sincronizados.`);
+console.log(`OK: proyecto universal iPhone/iPad 1.0 (6), cuatro orientaciones iPad, permisos, manifiesto, icono opaco 1024×1024, rutas SPM relativas, esquema Release y ${files} recursos sincronizados.`);
 console.log('Comprobación estática; no sustituye la compilación con Xcode ni las pruebas en un iPhone real.');

@@ -467,11 +467,16 @@
     busy=true;statusMessage=download?'Generando la ficha oficial del INE…':'Validando la selección con el INE…';statusKind='working';renderM8DataPanel();
     try{
       const response=await fetch(workerUrl(path),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({codigos:codes})});
-      if(!response.ok){let message=`Error ${response.status}`;try{const data=await response.json();message=data.message||data.error||message;}catch(_){message=await response.text()||message;}throw new Error(message);}
+      if(!response.ok){const text=await response.text();let message=text||`Error ${response.status}`;try{const data=JSON.parse(text);message=data.message||data.error||message;}catch(_){}throw new Error(message);}
       if(download){
-        const blob=await response.blob();const url=URL.createObjectURL(blob);const link=document.createElement('a');link.href=url;link.download=`Ficha_INE_${new Date().toISOString().slice(0,10)}.pdf`;document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);
+        const blob=await response.blob();const filename=`Ficha_INE_${new Date().toISOString().slice(0,10)}.pdf`;
+        if(window.MobileNative?.native){
+          await window.MobileNative.saveBlob(blob,filename);
+        }else{
+          const url=URL.createObjectURL(blob);const link=document.createElement('a');link.href=url;link.download=filename;document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);
+        }
         const people=response.headers.get('X-INE-Personas');const houses=response.headers.get('X-INE-Viviendas');
-        statusMessage=`Ficha descargada${people?` · ${Number(people).toLocaleString('es-BO')} personas`:''}${houses?` · ${Number(houses).toLocaleString('es-BO')} viviendas`:''}.`;statusKind='success';
+        statusMessage=`${window.MobileNative?.native?'Ficha preparada para guardar o compartir':'Ficha descargada'}${people?` · ${Number(people).toLocaleString('es-BO')} personas`:''}${houses?` · ${Number(houses).toLocaleString('es-BO')} viviendas`:''}.`;statusKind='success';
       }else{
         const data=await response.json();statusMessage=`Selección válida: ${num(data.cantidad_personas).toLocaleString('es-BO')} personas y ${num(data.cantidad_viviendas).toLocaleString('es-BO')} viviendas.`;statusKind='success';
       }

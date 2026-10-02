@@ -12,6 +12,9 @@ window.MobileNative={
   async download(url,filename){
     const response=await fetch(url);if(!response.ok)throw new Error('Archivo no disponible. Comprueba la conexión.');
     const blob=await response.blob();
+    return window.MobileNative.saveBlob(blob,filename);
+  },
+  async saveBlob(blob,filename){
     if(!native){const href=URL.createObjectURL(blob),a=document.createElement('a');a.href=href;a.download=filename;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(href),60000);return;}
     const base64=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result).split(',')[1]);reader.onerror=reject;reader.readAsDataURL(blob);});
     const saved=await Filesystem.writeFile({path:'fichas/'+filename.replace(/[^\p{L}\p{N}._ -]/gu,'_'),data:base64,directory:Directory.Cache,recursive:true});
