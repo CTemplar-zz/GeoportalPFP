@@ -17,8 +17,11 @@ const runtimes = JSON.parse(run('xcrun', ['simctl', 'list', 'runtimes', '--json'
 const runtime = runtimes.filter(r => r.isAvailable && r.identifier.includes('.iOS-'))
   .sort((a, b) => b.version.localeCompare(a.version, undefined, { numeric: true }))[0];
 if (!runtime) throw new Error('No installed iOS simulator runtime');
+const deviceTypes = JSON.parse(run('xcrun', ['simctl', 'list', 'devicetypes', '--json'], { stdio: 'pipe' })).devicetypes;
+const ipadType = deviceTypes.find(d => d.name.includes('iPad Pro') && d.name.includes('13-inch'));
+if (ipad && !ipadType) throw new Error(`No iPad Pro 13-inch device type: ${JSON.stringify(deviceTypes)}`);
 const device = run('xcrun', ['simctl', 'create', 'Geoportal-PFP-Capturas-65',
-  ipad ? 'com.apple.CoreSimulator.SimDeviceType.iPad-Pro-13-inch-M4' : 'com.apple.CoreSimulator.SimDeviceType.iPhone-13-Pro-Max', runtime.identifier], { stdio: 'pipe' }).toString().trim();
+  ipad ? ipadType.identifier : 'com.apple.CoreSimulator.SimDeviceType.iPhone-13-Pro-Max', runtime.identifier], { stdio: 'pipe' }).toString().trim();
 await fs.writeFile(path.join(root, 'device.json'), JSON.stringify({ device, runtime, resolution: size }, null, 2));
 console.log(`Capturing ${folder} on ${runtime.name}: ${device}`);
 let failure;
