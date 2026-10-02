@@ -4,10 +4,13 @@ import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import sharp from 'sharp';
 
+const ipad = process.env.CAPTURE_DEVICE === 'ipad';
+const size = ipad ? [2064, 2752] : [1284, 2778];
+const folder = ipad ? 'iPad-13-2064x2752' : 'iPhone-65-1284x2778';
 const root = path.resolve('build/ios/screenshots');
 const result = path.join(root, 'Screenshots.xcresult');
 const attachments = path.join(root, 'attachments');
-const output = path.join(root, 'iPhone-65-1284x2778');
+const output = path.join(root, folder);
 await fs.mkdir(root, { recursive: true });
 const run = (cmd, args, options = {}) => execFileSync(cmd, args, { stdio: 'inherit', ...options });
 const runtimes = JSON.parse(run('xcrun', ['simctl', 'list', 'runtimes', '--json'], { stdio: 'pipe' })).runtimes;
@@ -15,9 +18,9 @@ const runtime = runtimes.filter(r => r.isAvailable && r.identifier.includes('.iO
   .sort((a, b) => b.version.localeCompare(a.version, undefined, { numeric: true }))[0];
 if (!runtime) throw new Error('No installed iOS simulator runtime');
 const device = run('xcrun', ['simctl', 'create', 'Geoportal-PFP-Capturas-65',
-  'com.apple.CoreSimulator.SimDeviceType.iPhone-13-Pro-Max', runtime.identifier], { stdio: 'pipe' }).toString().trim();
-await fs.writeFile(path.join(root, 'device.json'), JSON.stringify({ device, runtime, resolution: [1284, 2778] }, null, 2));
-console.log(`Capturing iPhone 13 Pro Max on ${runtime.name}: ${device}`);
+  ipad ? 'com.apple.CoreSimulator.SimDeviceType.iPad-Pro-13-inch-M4' : 'com.apple.CoreSimulator.SimDeviceType.iPhone-13-Pro-Max', runtime.identifier], { stdio: 'pipe' }).toString().trim();
+await fs.writeFile(path.join(root, 'device.json'), JSON.stringify({ device, runtime, resolution: size }, null, 2));
+console.log(`Capturing ${folder} on ${runtime.name}: ${device}`);
 let failure;
 try {
   run('xcrun', ['simctl', 'boot', device]);
@@ -25,6 +28,7 @@ try {
   run('xcrun', ['simctl', 'status_bar', device, 'override', '--time', '9:41', '--dataNetwork', 'wifi', '--wifiMode', 'active', '--wifiBars', '3', '--batteryState', 'charged', '--batteryLevel', '100']);
   run('xcodebuild', ['test', '-project', 'ios/App/App.xcodeproj', '-scheme', 'Screenshots',
     '-destination', `platform=iOS Simulator,id=${device}`, '-destination-timeout', '120',
+    ...(ipad ? ['-only-testing:AppUITests/Screenshots/testAppStoreIPad'] : ['-only-testing:AppUITests/Screenshots/testAppStorePortrait']),
     '-configuration', 'Debug', '-derivedDataPath', path.join(root, 'DerivedData'),
     '-resultBundlePath', result, '-parallel-testing-enabled', 'NO',
     '-maximum-concurrent-test-simulator-destinations', '1',
@@ -41,7 +45,7 @@ try {
 try { run('xcrun', ['simctl', 'shutdown', device]); } catch {}
 if (failure) throw failure;
 
-const expected = ['01-mapa','02-modulos','03-grupos-capas','04-capas-activas','05-mapas-base','06-datos-cuenca','07-indicadores-cuenca'];
+const expected = ipad ? ['08-ipad-mapa'] : ['01-mapa','02-modulos','03-grupos-capas','04-capas-activas','05-mapas-base','06-datos-cuenca','07-indicadores-cuenca'];
 const files = [];
 async function walk(dir) {
   for (const item of await fs.readdir(dir, { withFileTypes: true })) {
@@ -74,11 +78,11 @@ for (const name of expected) {
   const file = named.get(name);
   if (!file) throw new Error(`Missing named XCTest screenshot PFP-${name}; inspect attachments manifest`);
   const metadata = await sharp(file).metadata();
-  if (metadata.width !== 1284 || metadata.height !== 2778) throw new Error(`Wrong native resolution for ${name}: ${metadata.width}x${metadata.height}`);
+  if (metadata.width !== size[0] || metadata.height !== size[1]) throw new Error(`Wrong native resolution for ${name}: ${metadata.width}x${metadata.height}`);
   // Lossless PNG, discard an unused alpha channel only; never resize or crop.
   await sharp(file).removeAlpha().png().toFile(path.join(output, `${name}.png`));
   report.push({ file: `${name}.png`, width: metadata.width, height: metadata.height, nativeScreenshot: true });
 }
 await fs.writeFile(path.join(output, 'resoluciones.json'), JSON.stringify(report, null, 2));
-run('ditto', ['-c', '-k', '--keepParent', output, path.join(root, 'Geoportal-PFP-Capturas-iPhone-65.zip')]);
-console.log(`Verified ${report.length} native screenshots at 1284x2778; no resizing.`);
+run('ditto', ['-c', '-k', '--keepParent', output, path.join(root, ipad ? 'Geoportal-PFP-Capturas-iPad-13.zip' : 'Geoportal-PFP-Capturas-iPhone-65.zip')]);
+console.log(`Verified ${report.length} native screenshots at ${size.join("x")}; no resizing.`);

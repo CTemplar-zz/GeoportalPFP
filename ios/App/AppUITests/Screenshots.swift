@@ -46,6 +46,12 @@ final class Screenshots: XCTestCase {
         add(attachment)
     }
 
+    func testAppStoreIPad() throws {
+        try tap("Explorar el mapa")
+        XCTAssertTrue(app.webViews.firstMatch.waitForExistence(timeout: 30))
+        capture("08-ipad-mapa", wait: 30)
+    }
+
     func testAppStorePortrait() throws {
         try tap("Explorar el mapa")
         XCTAssertTrue(app.webViews.firstMatch.waitForExistence(timeout: 30))

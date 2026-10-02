@@ -1,4 +1,28 @@
 workflows:
+  ios-ipad-screenshots:
+    name: Geoportal PFP - Captura nativa iPad 13
+    instance_type: mac_mini_m2
+    max_build_duration: 30
+    environment:
+      node: 22
+      xcode: latest
+    scripts:
+      - name: Install locked dependencies
+        script: npm ci
+      - name: Build web resources and sync iOS
+        script: |
+          set -e
+          npm run sync
+          npm run verify:ios
+      - name: Capture native iPad 13 screen
+        script: |
+          set -euo pipefail
+          CAPTURE_DEVICE=ipad node scripts/capture-ios.mjs
+    artifacts:
+      - build/ios/screenshots/iPad-13-2064x2752/*.png
+      - build/ios/screenshots/Geoportal-PFP-Capturas-iPad-13.zip
+      - build/ios/screenshots/native-startup.log
+      - build/ios/screenshots/attachments/**
   ios-screenshots:
     name: Geoportal PFP - Capturas iPhone 6.5
     instance_type: mac_mini_m2
