@@ -108,6 +108,7 @@
   function refresh(){
     applyStackOrder();
     $('activeCount').textContent=selected().length;
+    $('filterOpen').classList.toggle('active',selectedAPs.size>0);$('filterOpen').setAttribute('aria-pressed',String(selectedAPs.size>0));
     $('mobileModuleTitle').textContent=MODULES[currentModule]?.title||'Bolivia';
     updateSelectionChip();
     if(panel==='active')renderActive();
@@ -227,11 +228,11 @@
   }
   function moreRow(id,name,detail,ico){return `<button class="more-row" id="${id}">${icon(ico)}<span class="label">${name}<small>${detail}</small></span>${icon('chevron')}</button>`;}
   function renderMore(){
-    content.innerHTML=moreRow('moreFilter','Filtrar áreas protegidas','El filtro actualiza mapa e indicadores','filter')+moreRow('saveView','Guardar esta vista','Capas, ubicación y escala del mapa','bookmark')+moreRow('savedViews','Mis vistas guardadas',`${storage.get('views',[]).length} vistas disponibles`,'map')+moreRow('shareView','Compartir ubicación','Enviar la ubicación central del mapa','share')+moreRow('offlinePack','Preparar consulta sin conexión','Fichas de cuencas, indicadores y geometrías locales','download')+moreRow('installApp','Instalar aplicación','Añadir este geoportal a la pantalla de inicio','download')+moreRow('showWelcome','Acerca del geoportal','Una mirada viva a Bolivia','info')+'<div class="inline-note">Geoportal PFP · Bolivia<br>Datos del geoportal original. La cartografía y los indicadores conservan sus fuentes. Los servicios remotos y mapas base requieren conexión. La ilustración de bienvenida es conceptual.</div>';
-    $('moreFilter').onclick=()=>open('filters');$('saveView').onclick=()=>{const views=storage.get('views',[]);saveState();views.unshift({name:$('rightTitle').textContent==='Bolivia'?MODULES[currentModule].title:$('rightTitle').textContent,date:new Date().toISOString(),state:storage.get('state',{})});storage.set('views',views.slice(0,30));toast('Vista guardada en este dispositivo.');renderMore();};
+    content.innerHTML=moreRow('saveView','Guardar esta vista','Capas, ubicación y escala del mapa','bookmark')+moreRow('savedViews','Mis vistas guardadas',`${storage.get('views',[]).length} vistas disponibles`,'map')+moreRow('shareView','Compartir ubicación','Enviar la ubicación central del mapa','share')+moreRow('offlinePack','Preparar consulta sin conexión','Fichas de cuencas, indicadores y geometrías locales','download')+moreRow('installApp','Instalar aplicación','Añadir este geoportal a la pantalla de inicio','download')+moreRow('showWelcome','Acerca del geoportal','Una mirada a las áreas protegidas de Bolivia','info')+'<div class="inline-note">Geoportal PFP · Bolivia<br>Datos del geoportal original. La cartografía y los indicadores conservan sus fuentes. Los servicios remotos y mapas base requieren conexión. Fotografías de áreas protegidas de Bolivia.</div>';
+    $('saveView').onclick=()=>{const views=storage.get('views',[]);saveState();views.unshift({name:$('rightTitle').textContent==='Bolivia'?MODULES[currentModule].title:$('rightTitle').textContent,date:new Date().toISOString(),state:storage.get('state',{})});storage.set('views',views.slice(0,30));toast('Vista guardada en este dispositivo.');renderMore();};
     $('savedViews').onclick=()=>open('saved');
     $('shareView').onclick=async()=>{const c=map.getCenter(),url=`https://www.openstreetmap.org/?mlat=${c.lat.toFixed(5)}&mlon=${c.lng.toFixed(5)}#map=${map.getZoom()}/${c.lat.toFixed(5)}/${c.lng.toFixed(5)}`;try{await window.MobileNative.share(url);toast('Ubicación lista para compartir.');}catch(e){if(e.name!=='AbortError')toast('No se pudo compartir la ubicación.');}};
-    $('showWelcome').onclick=()=>{close();$('welcome').hidden=false;};
+    $('showWelcome').onclick=()=>{close();window.MobileWelcome.show(true);};
     $('offlinePack').onclick=downloadOffline;
     $('installApp').onclick=async()=>{if(window.MobileNative.native){toast('Ya estás usando la aplicación instalada.');return;}if(installPrompt){await installPrompt.prompt();installPrompt=null;}else toast('En iPhone: Safari → Compartir → Añadir a inicio. En Android: menú del navegador → Instalar aplicación.');};
   }
@@ -269,15 +270,15 @@
     refresh();saveState();
   }
   document.querySelectorAll('.mobile-nav button').forEach(b=>b.onclick=()=>b.dataset.panel==='map'?close():open(b.dataset.panel));
-  $('sheetClose').onclick=close;backdrop.onclick=close;$('modulePill').onclick=()=>open('layers');$('baseOpen').onclick=()=>open('bases');$('legendOpen').onclick=()=>open('legend');$('searchOpen').onclick=()=>open('search');$('selectionData').onclick=()=>open('data');$('brandHome').onclick=()=>open('more');
+  $('sheetClose').onclick=close;backdrop.onclick=close;$('modulePill').onclick=()=>open('layers');$('baseOpen').onclick=()=>open('bases');$('legendOpen').onclick=()=>open('legend');$('filterOpen').onclick=()=>open('filters');$('searchOpen').onclick=()=>open('search');$('selectionData').onclick=()=>open('data');$('brandHome').onclick=()=>open('more');
   $('extent').onclick=()=>map.fitBounds([[-23.1,-69.8],[-9.5,-57.3]],{paddingTopLeft:[28,140],paddingBottomRight:[65,115]});
   $('locate').onclick=async()=>{
     const b=$('locate');b.disabled=true;
     try{const {coords}=await window.MobileNative.locate();if(locationMarker)map.removeLayer(locationMarker);locationMarker=L.circleMarker([coords.latitude,coords.longitude],{radius:8,color:'#fff',weight:3,fillColor:'#2774c4',fillOpacity:1}).addTo(map).bindPopup('Tu ubicación · precisión aproximada '+Math.round(coords.accuracy)+' m');map.setView([coords.latitude,coords.longitude],13);toast('Ubicación encontrada.');}
     catch{toast('No se pudo obtener tu ubicación. Habilita el permiso de ubicación y vuelve a intentarlo.');}finally{b.disabled=false;}
   };
-  $('enterMap').onclick=()=>{$('welcome').hidden=true;storage.set('welcomed',true);map.invalidateSize();};
-  $('welcome').hidden=storage.get('welcomed',false);
+  $('enterMap').onclick=()=>{window.MobileWelcome.show(false);storage.set('welcomed',true);storage.set('welcomePhotos',window.MOBILE_WELCOME_REVISION);map.invalidateSize();};
+  window.MobileWelcome.show(!storage.get('welcomed',false)||storage.get('welcomePhotos',null)!==window.MOBILE_WELCOME_REVISION);
   const connectivity=()=>{$('offlineBadge').hidden=navigator.onLine;};window.addEventListener('online',connectivity);window.addEventListener('offline',()=>{connectivity();toast('Sin conexión. Puedes consultar los recursos guardados; los mapas base no estarán disponibles.');});connectivity();
   window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installPrompt=e;});
   document.addEventListener('keydown',e=>{

@@ -1,0 +1,26 @@
+.welcome-art{background:none}
+.welcome-photo{position:absolute;inset:0;overflow:hidden;opacity:0;transition:opacity .8s ease-in-out;background:#123e35}
+.welcome-photo.is-active{opacity:1}
+.welcome-photo::before{content:'';position:absolute;inset:-20px;background-image:var(--welcome-photo);background-position:center;background-size:cover;filter:blur(16px)}
+.welcome-photo img{position:absolute;top:0;left:50%;transform:translateX(-50%);height:100%;width:auto;max-width:none;display:block}
+.welcome-shade{background:linear-gradient(180deg,#061e2399 0%,#061e2326 25%,#061e2399 48%,#061e23ed 78%,#061e23f5 100%)}
+.welcome-top,.welcome-copy{text-shadow:0 2px 8px #0008}
+.welcome h1{font-size:clamp(30px,10.5vw,42px);line-height:1.12;letter-spacing:-1.4px;text-wrap:balance}
+.welcome .eyebrow,.welcome p,.welcome-tags span,.welcome-copy>small{color:#fff}
+.welcome-tags span{background:#061e2359;border-color:#ffffff80}
+.welcome .primary{text-shadow:none}
+.welcome-credit{position:absolute;right:calc(12px + env(safe-area-inset-right,0px));bottom:calc(8px + var(--safe-bottom));max-width:calc(100% - 24px - env(safe-area-inset-left,0px) - env(safe-area-inset-right,0px));padding:4px 7px;border-radius:6px;background:#061e2380;color:#fff;font-size:10px;line-height:1.3;text-align:right;text-shadow:0 1px 3px #000;pointer-events:none}
+@media(min-width:700px){.welcome h1{font-size:54px}}
+@media(max-height:650px){.welcome h1{font-size:32px}.welcome-copy{bottom:calc(40px + var(--safe-bottom))}}
+@media(orientation:landscape) and (max-height:650px){
+  .welcome-top{top:calc(18px + var(--safe-top));left:calc(24px + env(safe-area-inset-left,0px))}
+  .welcome-copy{left:auto;right:calc(24px + env(safe-area-inset-right,0px));width:min(55vw,490px);transform:none;top:calc(16px + var(--safe-top));bottom:calc(40px + var(--safe-bottom));display:flex;flex-direction:column;justify-content:center;overflow:auto}
+  .welcome h1{font-size:26px;line-height:1.1;margin:10px 0;letter-spacing:-.8px}
+  .welcome p{font-size:12px;line-height:1.55}
+  .welcome-tags{margin:12px 0;gap:5px}.welcome-tags span{padding:5px 8px}
+  .welcome .primary{min-height:48px;padding:12px 16px;flex-shrink:0}
+  .welcome-copy>small{margin-top:12px}
+  .map-actions{top:calc(78px + var(--safe-top));display:grid;grid-template-columns:44px 44px;gap:7px}
+  #locate{grid-area:1/1}#extent{grid-area:1/2}#baseOpen{grid-area:2/1}#legendOpen{grid-area:2/2}#filterOpen{grid-area:3/2}
+}
+@media(prefers-reduced-motion:reduce){.welcome-photo{transition:none}}
